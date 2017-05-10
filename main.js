@@ -18,8 +18,8 @@ form.onsubmit = function() {
 		err("Syntax error in subnetworks");
 	} else {
 		clear();
+		new Network(network.split('.').map(Number), parseInt(netmask)).split(subnets);
 	}
-	new Network(network.split('.').map(Number), parseInt(netmask)).split(subnets);
 	return false;
 };
 
