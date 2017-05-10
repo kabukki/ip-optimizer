@@ -1,59 +1,41 @@
 'use strict';
 
 /* DOM vars */
-var tbody = document.getElementsByTagName('table')[0].getElementsByTagName('tbody')[0];
+var tbody = document.getElementsByTagName('table')[0].getElementsByTagName('tbody')[0]
+	, form = document.forms[0]
+	, error = document.getElementById('error');
 
-/*
- * Returns the closest power of 2 that
- *  is greater or equal to n.
- * This equates the number of bits required
- *  to map n hosts.
- */
-function getRequiredBits(n) {
-	var p = 0;
+form.onsubmit = function() {
+	var network = form['network'].value
+		, netmask = form['netmask'].value
+		, subnets = form['subnets'].value.split(',').filter(Number).map(Number);
 
-	while (Math.pow(2, p) < n)
-		p++;
-	return p;
-}
-
-/*
- * Split available bits into subnetworks with 
- *  their capacity passed as parameter.
- * Returns the addresses of these networks.
- */
-function split(network, subnets) {
-	var addr = 0;
-
-	subnets.sort(function(a, b) { return b-a; });
-	network.diagnose();
-	for (var i = 0; i < subnets.length; i++) {
-		var bits = getRequiredBits(subnets[i] + 2);
-		var net = new Network([network.address[0], network.address[1], network.address[2], addr], 32 - bits);
-
-		console.log('--- Subnetwork #' + i + ' ---');
-		console.log('Bits required for ' + subnets[i] + ' hosts + 2 addresses: ' + bits + 
-			' ('+ (subnets[i]+2) + ' used/' + Math.pow(2, bits) + ' available)');
-		console.log('Netmask is             : ' + (256 - Math.pow(2, bits)) + ' (CIDR: /' + net.mask + ') (' + d2b(256 - Math.pow(2, bits)) + ')');
-		console.log('Network address is     : ' + net.address.join('.'));
-		console.log('Host addresses are     : .' + (addr + 1) + ' -> .' + (addr + Math.pow(2, bits) - 2));
-		console.log('Network broadcast is   : ' + net.broadcast.join('.'));
-		addr += Math.pow(2, bits);
+	if (network.match(/^[0-9]{1,3}(\.[0-9]{1,3}){3}$/g) == null) {
+		err("Invalid network IP.");
+	} else if (isNaN(netmask) || netmask < 0 || netmask > 32) {
+		err("Invalid mask.");
+	} else if (subnets.length == 0) {
+		err("Syntax error in subnetworks");
+	} else {
+		clear();
 	}
-}
+	new Network(network.split('.').map(Number), parseInt(netmask)).split(subnets);
+	return false;
+};
 
 function displayNetworks(networks) {
 	while (tbody.firstChild)
 		tbody.removeChild(tbody.firstChild);
-	var row = myCreateElement("tr");
 	for (var i = 0; i < networks.length; i++) {
+		var net = networks[i];
+		var row = myCreateElement("tr");
 		row.appendChild(myCreateElement("td", {innerHTML: i}));
-		row.appendChild(myCreateElement("td", {innerHTML: ''}));
-		row.appendChild(myCreateElement("td", {innerHTML: ''}));
-		row.appendChild(myCreateElement("td", {innerHTML: ''}));
-		row.appendChild(myCreateElement("td", {innerHTML: ''}));
+		row.appendChild(myCreateElement("td", {innerHTML: net.address.join('.')}));
+		row.appendChild(myCreateElement("td", {innerHTML: (256 - Math.pow(2, net.bits)) + ' (CIDR: /' + net.mask + ')'}));
+		row.appendChild(myCreateElement("td", {innerHTML: '.' + (net.address[3] + 1) + ' -> .' + (net.address[3] + net.nbHosts - 2)}));
+		row.appendChild(myCreateElement("td", {innerHTML: net.broadcast.join('.')}));
+		tbody.appendChild(row);
 	}
-	tbody.appendChild(row);
 }
 
 /* Helper */
@@ -62,6 +44,23 @@ function displayNetworks(networks) {
  */
 function d2b(n) {
 	return parseInt(n, 10).toString(2);
+}
+
+/*
+ * Notifies the user of an error,
+ *  both on the gui & in the console.
+ */
+function err(msg) {
+	error.innerHTML = msg;
+	console.log(msg);
+}
+
+/*
+ * Notifies the user of an error,
+ *  both on the gui & in the console.
+ */
+function clear() {
+	error.innerHTML = '';
 }
 
 /*

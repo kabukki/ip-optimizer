@@ -15,11 +15,17 @@
 				IPv4 Optimizer	
 			</header>
 			<div>
+				<p>
+					<strong>Warning:</strong> this program only works for class C addresses. Other addresses may cause undefined behaviour.
+				</p>
+				<p id='error'></p>
 				<form>
 					Network IP:<br>
 					<input type='text' name='network' placeholder='192.168.1.0'/><br>
 					Subnet mask (CIDR):<br>
 					<input type='text' name='netmask' placeholder='24'/><br>
+					Subnetworks capacity (nb of hosts, excluding network &amp; broadcast addresses) separated by a comma ',':<br>
+					<input type='text' name='subnets' placeholder='2,2,4,7,13'/><br>
 					<input type='submit'/>
 				</form>
 				<hr>
@@ -34,13 +40,6 @@
 						</tr>
 					</thead>
 					<tbody>
-						<tr>
-							<td>#</td>
-							<td>#</td>
-							<td>#</td>
-							<td>#</td>
-							<td>#</td>
-						</tr>
 					</tbody>
 				</table>
 			</div>
