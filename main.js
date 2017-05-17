@@ -30,8 +30,8 @@ function displayNetworks(networks) {
 		var net = networks[i];
 		var row = myCreateElement("tr");
 		row.appendChild(myCreateElement("td", {innerHTML: i}));
-		row.appendChild(myCreateElement("td", {innerHTML: net.address.join('.')}));
 		row.appendChild(myCreateElement("td", {innerHTML: (256 - Math.pow(2, net.bits)) + ' (CIDR: /' + net.mask + ')'}));
+		row.appendChild(myCreateElement("td", {innerHTML: net.address.join('.')}));
 		row.appendChild(myCreateElement("td", {innerHTML: '.' + (net.address[3] + 1) + ' -> .' + (net.address[3] + net.nbHosts - 2)}));
 		row.appendChild(myCreateElement("td", {innerHTML: net.broadcast.join('.')}));
 		tbody.appendChild(row);
